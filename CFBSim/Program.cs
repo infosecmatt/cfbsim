@@ -51,62 +51,38 @@ internal class Program
         
 
         Console.WriteLine("Playing some games...");
-        foreach (var team in teams)
+        foreach (var team1 in teams)
         {
-            int BamaWinCount = 0;
-            int BamaLossCount = 0;
-            int BamaHighScore = 0;
-            int BamaLowScore = 1000;
-            int BamaTotalPoints = 0;
-            int OppTotalPoints = 0;
-            for (int i = 0; i < 50; i++)
+            foreach (var team2 in teams)
             {
-                Game currentGame = new Game(Bama, team);
-                BamaTotalPoints += currentGame.HomeTeamScore;
-                OppTotalPoints += currentGame.AwayTeamScore;
-                if (currentGame.HomeTeamScore > BamaHighScore)
+                if (team1.uniName != team2.uniName)
                 {
-                    BamaHighScore = currentGame.HomeTeamScore;
+                    int Team1WinCount = 0;
+                    int Team1LossCount = 0;
+                    int Team1HighScore = 0;
+                    int Team1LowScore = 1000;
+                    int Team1TotalPoints = 0;
+                    int OppTotalPoints = 0;
+                    for (int i = 0; i < 50; i++)
+                    {
+                        Game currentGame = new Game(team1, team2);
+                        Team1TotalPoints += currentGame.HomeTeamScore;
+                        OppTotalPoints += currentGame.AwayTeamScore;
+                        if (currentGame.HomeTeamScore > Team1HighScore)
+                        {
+                            Team1HighScore = currentGame.HomeTeamScore;
+                        }
+                        if (currentGame.HomeTeamScore < Team1LowScore) { Team1LowScore = currentGame.HomeTeamScore; }
+                        string winner = currentGame.Winner;
+                        if (winner == team1.uniName)
+                        {
+                            Team1WinCount++;
+                        }
+                        else { Team1LossCount++; }
+                    }
+                    Console.WriteLine($"In a simulation of 50 games between {team1.uniName} and {team2.uniName}, {team1.uniName} won {Team1WinCount} times and {team2.uniName} won {Team1LossCount} times. {team1.uniName}'s highest point total was {Team1HighScore}, its lowest was {Team1LowScore}, and the average game score was {team1.teamShorthand} {Team1TotalPoints / 50} {team2.teamShorthand} {OppTotalPoints / 50}");
                 }
-                if (currentGame.HomeTeamScore < BamaLowScore) { BamaLowScore = currentGame.HomeTeamScore; }
-                string winner = currentGame.Winner;
-                if (winner == "Alabama")
-                {
-                    BamaWinCount++;
-                }
-                else { BamaLossCount++; }
             }
-            Console.WriteLine($"In a simulation of 50 games between {Bama.uniName} and {team.uniName}, {Bama.uniName} won {BamaWinCount} times and {team.uniName} won {BamaLossCount} times. {Bama.uniName}'s highest point total was {BamaHighScore}, its lowest was {BamaLowScore}, and the average game score was {Bama.teamShorthand} {BamaTotalPoints / 50} {team.teamShorthand} {OppTotalPoints / 50}");
         }
-
-        foreach (var team in teams)
-        {
-            int TAMUWinCount = 0;
-            int TAMULossCount = 0;
-            int TAMUHighScore = 0;
-            int TAMULowScore = 1000;
-            int TAMUTotalPoints = 0;
-            int OppTotalPoints = 0;
-            for (int i = 0; i < 50; i++)
-            {
-                Game currentGame = new Game(TexasAM, team);
-                TAMUTotalPoints += currentGame.HomeTeamScore;
-                OppTotalPoints+= currentGame.AwayTeamScore;
-                if (currentGame.HomeTeamScore > TAMUHighScore)
-                {
-                    TAMUHighScore= currentGame.HomeTeamScore;
-                }
-                if (currentGame.HomeTeamScore < TAMULowScore) { TAMULowScore= currentGame.HomeTeamScore; }
-                string winner = currentGame.Winner;
-                if (winner == "Texas A&M")
-                {
-                    TAMUWinCount++;
-                }
-                else { TAMULossCount++; }
-            }
-            Console.WriteLine($"In a simulation of 50 games between {TexasAM.uniName} and {team.uniName}, {TexasAM.uniName} won {TAMUWinCount} times and {team.uniName} won {TAMULossCount} times. {TexasAM.uniName}'s highest point total was {TAMUHighScore}, its lowest was {TAMULowScore}, and the average game score was {TexasAM.teamShorthand} {TAMUTotalPoints / 50} {team.teamShorthand} {OppTotalPoints / 50}");
-        }
-        //Console.WriteLine(Game.GetFinalScore(Bama, UMass));
-        //Console.WriteLine(Game.GetFinalScore(Bama, Georgia));
     }
 }

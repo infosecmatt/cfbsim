@@ -10,40 +10,44 @@ namespace CFBSim
     {
         public Team homeTeam;
         public Team awayTeam;
-        //public int homeTeamScore;
-        //public int awayTeamScore;
-        //public string winner;
+        private int homeTeamScore;
+        private int awayTeamScore;
+        private string winner;
 
         public Game(Team aHomeTeam, Team aAwayTeam)
         {
             homeTeam = aHomeTeam;
             awayTeam = aAwayTeam;
+            homeTeamScore = GetTeamScore(homeTeam, awayTeam);
+            awayTeamScore = GetTeamScore(awayTeam, homeTeam);
+            winner = GetWinner();
         }
         public int HomeTeamScore
         {
-            get { return GetTeamScore(homeTeam, awayTeam); }
+            get { return homeTeamScore; }
         }
         public int AwayTeamScore
         {
-            get { return GetTeamScore(awayTeam, homeTeam); }
+            get { return awayTeamScore; }
         }
         public string Winner
+        { get { return winner; } }
+        private string GetWinner()
         {
-            get
+            string winner = string.Empty;
+            if (HomeTeamScore > AwayTeamScore)
             {
-                if (HomeTeamScore > AwayTeamScore)
-                {
-                    return homeTeam.uniName;
-                }
-                else if (AwayTeamScore > HomeTeamScore)
-                {
-                    return awayTeam.uniName;
-                }
-                else
-                {
-                    return "tie";
-                }
+                winner = homeTeam.uniName;
             }
+            else if (AwayTeamScore > HomeTeamScore)
+            {
+                winner = awayTeam.uniName;
+            }
+            else
+            {
+                winner = "tie";
+            }
+            return winner;
         }
         private int GetTeamScore(Team scoringTeam, Team opponent)
         {
