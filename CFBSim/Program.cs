@@ -8,12 +8,12 @@ internal class Program
         List<Team> teams = File.ReadAllLines("C:\\Users\\matt\\source\\repos\\CFBSim\\fbsTeams.csv").Skip(1).Select(v => Team.FromCsv(v)).ToList();
 
         //testing football scores
-        Team ohioState = teams.SingleOrDefault(item => item.uniName.Equals("Ohio State"));
-        Team bama = teams.SingleOrDefault(item => item.uniName.Equals("Alabama"));
+        Team mass = teams.SingleOrDefault(item => item.uniName.Equals("Massachusetts"));
+        Team uga = teams.SingleOrDefault(item => item.uniName.Equals("Georgia"));
 
-        for (int i = 0; i < 50; i++)
+        for (int i = 0; i < 100; i++)
         {
-            Game game = new Game(ohioState, bama);
+            Game game = new Game(mass, uga);
             Console.WriteLine(game.GetFinalScore());
         }
 

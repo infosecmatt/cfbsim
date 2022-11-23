@@ -85,29 +85,57 @@ namespace CFBSim
         {
             int preScore = rawScore;
             int realScore = 0;
-            while (preScore > 1)
+            if (preScore < 7)
             {
-                //in general seems like the TD-FG ratio in college is 2.5-3. rounding up to 3 for simplicity's sake
-                //though i couldn't find any pre-calculated data for safeties for college football, in the NFL they occur once every 14 games on average. So I used the following formula to determine frequency of safeties relative to TDs and FGs: 1/((TDs/Game + FGs/Game ) * 14) = Share of scores that are safeties. It's about 1-2%.
+                //in testing the original method (found in the else statement below) wasn't really producing shutouts or 58-3 type showings. this basically says "if the randomly generated score is less than a touchdown, give it 50% odds of being a shutout and otherwise make it likely that they just got a field goal or two". not very scientific but it'll do the job
                 Random rand = new Random();
                 double odds = rand.NextDouble();
-                //3 to 1 odds of a TD to a FG
-                if (odds < 0.73)
+                if (odds > 0.5)
                 {
-                    realScore += 7;
-                    preScore -= 7;
+                    while (preScore > 2)
+                    {
+                        odds = rand.NextDouble();
+                        if (odds < .95)
+                        {
+                            realScore += 3;
+                            preScore -= 3;
+                        }
+                        //5% chance of a safety
+                        else
+                        {
+                            realScore += 2;
+                            preScore -= 2;
+                        }
+                    }
+                }
 
-                }
-                else if (odds < .98)
+            }
+            else
+            {
+                while (preScore > 2)
                 {
-                    realScore += 3;
-                    preScore -= 3;
-                }
-                //2% chance of a safety
-                else
-                {
-                    realScore += 2;
-                    preScore -= 2;
+                    //in general seems like the TD-FG ratio in college is 2.5-3. rounding up to 3 for simplicity's sake
+                    //though i couldn't find any pre-calculated data for safeties for college football, in the NFL they occur once every 14 games on average. So I used the following formula to determine frequency of safeties relative to TDs and FGs: 1/((TDs/Game + FGs/Game ) * 14) = Share of scores that are safeties. It's about 1-2%.
+                    Random rand = new Random();
+                    double odds = rand.NextDouble();
+                    //3 to 1 odds of a TD to a FG
+                    if (odds < 0.73)
+                    {
+                        realScore += 7;
+                        preScore -= 7;
+
+                    }
+                    else if (odds < .98)
+                    {
+                        realScore += 3;
+                        preScore -= 3;
+                    }
+                    //2% chance of a safety
+                    else
+                    {
+                        realScore += 2;
+                        preScore -= 2;
+                    }
                 }
             }
             return realScore;
