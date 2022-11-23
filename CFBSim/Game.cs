@@ -10,6 +10,7 @@ namespace CFBSim
     {
         public Team homeTeam;
         public Team awayTeam;
+        public int? currentWeek;
         private int homeTeamScore;
         private int awayTeamScore;
         private string winner;

@@ -15,6 +15,7 @@ namespace CFBSim
         public string state;
         public int enrollment;
         public string conference;
+        public string confDiv;
         public int historicalWins;
         public double prestige;
         public string offPlayStyle;
@@ -25,12 +26,13 @@ namespace CFBSim
         static readonly double leagueAverageScore = 28.4;
         static readonly double leagueAveragePlays = 136.7;
 
-        public Team(string aUniName, string aTeamName, string aTeamShorthand, string aConference, string aCity, string aState, int aEnrollment, double aPrestige, string aOffPlayStyle, double aOffAbility, string aDefPlayStyle, double aDefAbility, double aHomeFieldAdvantage)
+        public Team(string aUniName, string aTeamName, string aTeamShorthand, string aConference, string aConfDiv, string aCity, string aState, int aEnrollment, double aPrestige, string aOffPlayStyle, double aOffAbility, string aDefPlayStyle, double aDefAbility, double aHomeFieldAdvantage)
         {
             uniName = aUniName;
             teamName = aTeamName;
             teamShorthand = aTeamShorthand;
             conference = aConference;
+            confDiv = aConfDiv;
             city = aCity;
             state = aState;
             enrollment = aEnrollment;
@@ -53,6 +55,7 @@ namespace CFBSim
             string state = values[4];
             int enrollment = Int32.Parse(values[5]);
             string conference = values[6];
+            string confDiv = values[19];
             int historicalWins = Int32.Parse(values[7]);
             double ppgScored = Convert.ToDouble(values[8]);
             double ppgAllowed = Convert.ToDouble(values[9]);
@@ -68,7 +71,7 @@ namespace CFBSim
 
             double teamPace = offPassAtt + offRushAtt + defPassAtt + defRushAtt;
 
-            return new Team(uniName, teamName, teamShorthand, conference, city, state, enrollment, (historicalWins / 10), Team.DetermineOffPlayStyle(offPassAtt, offRushAtt), Team.CalcOffAbilityScore(ppgScored, teamPace), Team.DetermineDefPlayStyle(defPassYds, defPassAtt, defRushYds, defRushAtt), Team.CalcDefAbilityScore(ppgAllowed, teamPace), Team.GetHomeFieldAdvantage(homeATS));
+            return new Team(uniName, teamName, teamShorthand, conference, confDiv, city, state, enrollment, (historicalWins / 10), Team.DetermineOffPlayStyle(offPassAtt, offRushAtt), Team.CalcOffAbilityScore(ppgScored, teamPace), Team.DetermineDefPlayStyle(defPassYds, defPassAtt, defRushYds, defRushAtt), Team.CalcDefAbilityScore(ppgAllowed, teamPace), Team.GetHomeFieldAdvantage(homeATS));
 
         }
 
