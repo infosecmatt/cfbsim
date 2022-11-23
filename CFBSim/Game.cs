@@ -52,31 +52,65 @@ namespace CFBSim
         private int GetTeamScore(Team scoringTeam, Team opponent)
         {
             double points = (scoringTeam.OffAbility / opponent.DefAbility) * 30;
+            double randPoints = 0;
+            do
+            {
+                Random rand = new Random(); //reuse this if you are generating many
+                double u1 = 1.0 - rand.NextDouble(); //uniform(0,1] random doubles
+                double u2 = 1.0 - rand.NextDouble();
+                double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
+                randPoints = points + (points * .33) * randStdNormal; //random normal(mean,stdDev^2)
+            }
+            while (randPoints < 0);
+            
 
-            Random rand = new Random(); //reuse this if you are generating many
-            double u1 = 1.0 - rand.NextDouble(); //uniform(0,1] random doubles
-            double u2 = 1.0 - rand.NextDouble();
-            double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
-                         Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
-            double randNormal =
-                         points + (points * .33) * randStdNormal; //random normal(mean,stdDev^2)
-
-            return (int)Math.Round(randNormal);
+            int rawScore = (int)Math.Round(randPoints);
+            return FootballizeScore(rawScore);
         }
-        public string GetFinalScore(Team homeTeam, Team awayTeam)
+        public string GetFinalScore()
         {
             int homePoints = GetTeamScore(homeTeam, awayTeam);
             int awayPoints = GetTeamScore(awayTeam, homeTeam);
+            //no ties allowed
+            while (homePoints == awayPoints)
+            {
+                homePoints = GetTeamScore(homeTeam, awayTeam);
+            }
             string finalScore = $"{homeTeam.teamShorthand} {homePoints} - {awayTeam.teamShorthand} {awayPoints}";
-            if (homePoints > awayPoints)
-            {
-                return homeTeam.uniName;
-            }
-            else
-            {
-                return awayTeam.uniName;
-            }
+            return finalScore;
 
+        }
+
+        private int FootballizeScore(int rawScore)
+        {
+            int preScore = rawScore;
+            int realScore = 0;
+            while (preScore > 1)
+            {
+                //in general seems like the TD-FG ratio in college is 2.5-3. rounding up to 3 for simplicity's sake
+                //though i couldn't find any pre-calculated data for safeties for college football, in the NFL they occur once every 14 games on average. So I used the following formula to determine frequency of safeties relative to TDs and FGs: 1/((TDs/Game + FGs/Game ) * 14) = Share of scores that are safeties. It's about 1-2%.
+                Random rand = new Random();
+                double odds = rand.NextDouble();
+                //3 to 1 odds of a TD to a FG
+                if (odds < 0.73)
+                {
+                    realScore += 7;
+                    preScore -= 7;
+
+                }
+                else if (odds < .98)
+                {
+                    realScore += 3;
+                    preScore -= 3;
+                }
+                //2% chance of a safety
+                else
+                {
+                    realScore += 2;
+                    preScore -= 2;
+                }
+            }
+            return realScore;
         }
     }
 }

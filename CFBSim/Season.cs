@@ -9,10 +9,11 @@ namespace CFBSim
     internal class Season
     {
         public int year;
+        public int currentWeek;
 
-        public Season(List<Team> teams)
+        /*public Season(List<Team> teams)
         {
 
-        }
+        }*/
     }
 }

@@ -7,13 +7,14 @@ internal class Program
     {
         List<Team> teams = File.ReadAllLines("C:\\Users\\matt\\source\\repos\\CFBSim\\fbsTeams.csv").Skip(1).Select(v => Team.FromCsv(v)).ToList();
 
-        Console.WriteLine("The following teams are very good at defense:");
-        foreach (var team in teams)
+        //testing football scores
+        Team ohioState = teams.SingleOrDefault(item => item.uniName.Equals("Ohio State"));
+        Team bama = teams.SingleOrDefault(item => item.uniName.Equals("Alabama"));
+
+        for (int i = 0; i < 50; i++)
         {
-            if (team.DefAbility > 90)
-            {
-                Console.WriteLine(team.uniName);
-            }
+            Game game = new Game(ohioState, bama);
+            Console.WriteLine(game.GetFinalScore());
         }
 
         /*Console.WriteLine($"There are {teams.Count} teams in college football.");
@@ -22,7 +23,7 @@ internal class Program
             Console.WriteLine(team.SummarizeTeam());
             Console.WriteLine();
         }*/
-        
+
 
         /*Console.WriteLine("Playing some games...");
         foreach (var team1 in teams)
