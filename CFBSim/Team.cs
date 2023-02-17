@@ -76,11 +76,14 @@ namespace CFBSim
             double offPassAtt = Convert.ToDouble(values[15]);
             double offRushAtt = Convert.ToDouble(values[16]);
             double defPassAtt = Convert.ToDouble(values[17]);
-            double defRushAtt = Convert.ToDouble(values[18]); 
+            double defRushAtt = Convert.ToDouble(values[18]);
+            string mainRival = values[20];
+            string secondRival = values[21];
+            string thirdRival = values[22];
 
             double teamPace = offPassAtt + offRushAtt + defPassAtt + defRushAtt;
 
-            return new Team(uniName, teamName, teamShorthand, conference, confDiv, city, state, enrollment, (historicalWins / 10), Team.DetermineOffPlayStyle(offPassAtt, offRushAtt), Team.CalcOffAbilityScore(ppgScored, teamPace), Team.DetermineDefPlayStyle(defPassYds, defPassAtt, defRushYds, defRushAtt), Team.CalcDefAbilityScore(ppgAllowed, teamPace), Team.GetHomeFieldAdvantage(homeATS));
+            return new Team(uniName, teamName, teamShorthand, conference, confDiv, city, state, enrollment, (historicalWins / 10), Team.DetermineOffPlayStyle(offPassAtt, offRushAtt), Team.CalcOffAbilityScore(ppgScored, teamPace), Team.DetermineDefPlayStyle(defPassYds, defPassAtt, defRushYds, defRushAtt), Team.CalcDefAbilityScore(ppgAllowed, teamPace), Team.GetHomeFieldAdvantage(homeATS), mainRival, secondRival, thirdRival);
 
         }
 

@@ -25,6 +25,9 @@ internal class Program
                 }
             }
             Console.WriteLine($"{team.uniName} games: {gameCount}");
+
+            List<Team> accTeams = teams.Where(team => team.conference == "ACC").ToList();
+            Season.Generate355StyleConfScheduleRotation(accTeams);
         }
 
         /*        foreach (Game game in schedule) { Console.WriteLine($"{game.awayTeam.uniName} @ {game.homeTeam.uniName}"); }
