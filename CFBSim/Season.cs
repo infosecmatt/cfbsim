@@ -75,7 +75,7 @@ namespace CFBSim
             return FinalSecSchedule;
         }
 
-        // this method is for generating the "5" portion of the 3-5-5 schedule. it will produce two rotations and assign them to teams in a conference given as input
+        // this method is for generating the 3-5-5 schedule. it will produce two rotations and assign them to teams in a conference given as input
         public void Generate355StyleConfScheduleRotation(List<Team> teams)
         {
             //available teams starts off as all teams, but after a team hits 5 scheduled games it is removed from this list
@@ -98,40 +98,62 @@ namespace CFBSim
             while (availableTeams.Count > 0)
             {
                 //iterate over each team, one at a time. pick a random team to play against. update their availability count. update available teams (if necessary)
-                for (int i = 0; i < availableTeams.Count; i++)
+                for (int i = 0; i < teams.Count; i++)
                 {
-                    Team schedulingTeam = availableTeams[i];
-                    int schedulingTeamGameCountIndex = teams.FindIndex(x => x.uniName == schedulingTeam.uniName);
+                    // if there's no available teams then stop. probably silly that i check this condition twice
+                    if (availableTeams.Count == 0) { break; }
+
+                    Team schedulingTeam = teams[i];
+                    if (! availableTeams.Any(x => x.uniName == schedulingTeam.uniName)) { continue; } //skip this if the team isn't available
+                    //find corresponding index of team in availableTeams array
+                    int availableTeamIndex = availableTeams.FindIndex(x => x.uniName == schedulingTeam.uniName);
 
                     //get a random team from those available
                     Random rnd = new Random();
                     int r = rnd.Next(availableTeams.Count);
                     Team opposingTeam = availableTeams[r];
-                    int opposingTeamGameCountIndex = teams.FindIndex(x => x.uniName == opposingTeam.uniName);
+                    int opposingTeamIndex = teams.FindIndex(x => x.uniName == opposingTeam.uniName);
 
-                    bool alreadyScheduled = rotationA[schedulingTeamGameCountIndex].Any(item => item.uniName == opposingTeam.uniName);
+                    bool alreadyScheduled = rotationA[i].Any(item => item.uniName == opposingTeam.uniName);
 
                     // if the game hasn't already been scheduled and the team isn't facing itself, add the team
                     if (! alreadyScheduled && opposingTeam.uniName != schedulingTeam.uniName)
                     {
                         //add to the rotation of both teams
-                        rotationA[schedulingTeamGameCountIndex].Add(opposingTeam);
-                        rotationA[opposingTeamGameCountIndex].Add(schedulingTeam);
+                        rotationA[i].Add(opposingTeam);
+                        rotationA[opposingTeamIndex].Add(schedulingTeam);
 
                         //check if either team has hit the limit, which in this case is 8 (3 fixed rivalries plus 5 rotational games)
-                        if (rotationA[schedulingTeamGameCountIndex].Count == 8)
+                        if (rotationA[i].Count == 8)
                         {
-                            availableTeams.RemoveAt(schedulingTeamGameCountIndex);
+                            availableTeams.RemoveAt(availableTeamIndex);
                         }
-                        if (rotationA[opposingTeamGameCountIndex].Count == 8)
+                        if (rotationA[opposingTeamIndex].Count == 8)
                         {
-                            availableTeams.RemoveAt(opposingTeamGameCountIndex);
+                            availableTeams.RemoveAt(r);
                         }
                     }
                 }
             }
             //rotationB is taking the difference between rotationA and all teams in the conference to get the leftover teams
             List<Team>[] rotationB = new List<Team>[teams.Count];
+            
+            // for each team, take the list of all teams except those already in rotationA. this will give you the opponents not scheduled and the host team itself. it will not include rivals. for rotationB i'll fix those issues separately.
+            for (int i = 0; i < rotationB.Length; i++)
+            {
+                //gets all teams not found in rotationA
+                rotationB[i] = teams.Except(rotationA[i]).ToList();
+                //make sure team doesn't play itself.
+                int selfTeam = rotationB[i].FindIndex(x => x.uniName == teams[i].uniName);
+                rotationB[i].RemoveAt(selfTeam);
+                //copy paste because i'm lazy
+                int mainRivalIndex = teams.FindIndex(x => x.uniName == teams[i].mainRivalUniName);
+                int secondRivalIndex = teams.FindIndex(x => x.uniName == teams[i].secondRivalUniName);
+                int thirdRivalIndex = teams.FindIndex(x => x.uniName == teams[i].thirdRivalUniName);
+                rotationB[i].Add(teams[mainRivalIndex]);
+                rotationB[i].Add(teams[secondRivalIndex]);
+                rotationB[i].Add(teams[thirdRivalIndex]);
+            }
 
             return;
         }
