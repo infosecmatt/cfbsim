@@ -23,10 +23,15 @@ namespace CFBSim
         public string defPlayStyle;
         private double defAbility;
         public double homeFieldAdvantage;
+        public string mainRivalUniName;
+        public string secondRivalUniName;
+        public string thirdRivalUniName;
+
+
         static readonly double leagueAverageScore = 28.4;
         static readonly double leagueAveragePlays = 136.7;
 
-        public Team(string aUniName, string aTeamName, string aTeamShorthand, string aConference, string aConfDiv, string aCity, string aState, int aEnrollment, double aPrestige, string aOffPlayStyle, double aOffAbility, string aDefPlayStyle, double aDefAbility, double aHomeFieldAdvantage)
+        public Team(string aUniName, string aTeamName, string aTeamShorthand, string aConference, string aConfDiv, string aCity, string aState, int aEnrollment, double aPrestige, string aOffPlayStyle, double aOffAbility, string aDefPlayStyle, double aDefAbility, double aHomeFieldAdvantage, string aMainRivalUniName, string aSecondRivalUniName, string aThirdRivalUniName)
         {
             uniName = aUniName;
             teamName = aTeamName;
@@ -42,6 +47,10 @@ namespace CFBSim
             defPlayStyle = aDefPlayStyle;
             defAbility = aDefAbility;
             homeFieldAdvantage = aHomeFieldAdvantage;
+            mainRivalUniName = aMainRivalUniName;
+            secondRivalUniName = aSecondRivalUniName;
+            thirdRivalUniName = aThirdRivalUniName;
+
         }
 
         public static Team FromCsv(string csvLine)

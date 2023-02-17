@@ -1,7 +1,9 @@
 ﻿using Microsoft.VisualBasic;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -68,8 +70,70 @@ namespace CFBSim
 
 
             }
+            List<Game> FinalSecSchedule = secSchedule.Distinct().ToList();
 
-            return secSchedule;
+            return FinalSecSchedule;
+        }
+
+        // this method is for generating the "5" portion of the 3-5-5 schedule. it will produce two rotations and assign them to teams in a conference given as input
+        public void Generate355StyleConfScheduleRotation(List<Team> teams)
+        {
+            //available teams starts off as all teams, but after a team hits 5 scheduled games it is removed from this list
+            List<Team> availableTeams = teams;
+            // start off with rotationA. this is a 1d array of a list of teams. this contains all opponents of the team.
+            List<Team>[] rotationA = new List<Team>[teams.Count];
+
+            //first, add rivalries to the rotations
+            for (int i = 0; i < teams.Count; i++)
+            {
+                int mainRivalIndex = teams.FindIndex(x => x.uniName == teams[i].mainRivalUniName);
+                int secondRivalIndex = teams.FindIndex(x => x.uniName == teams[i].secondRivalUniName);
+                int thirdRivalIndex = teams.FindIndex(x => x.uniName == teams[i].thirdRivalUniName);
+                rotationA[i].Add(teams[mainRivalIndex]);
+                rotationA[i].Add(teams[secondRivalIndex]);
+                rotationA[i].Add(teams[thirdRivalIndex]);
+            }
+
+            // now, the rest
+            while (availableTeams.Count > 0)
+            {
+                //iterate over each team, one at a time. pick a random team to play against. update their availability count. update available teams (if necessary)
+                for (int i = 0; i < availableTeams.Count; i++)
+                {
+                    Team schedulingTeam = availableTeams[i];
+                    int schedulingTeamGameCountIndex = teams.FindIndex(x => x.uniName == schedulingTeam.uniName);
+
+                    //get a random team from those available
+                    Random rnd = new Random();
+                    int r = rnd.Next(availableTeams.Count);
+                    Team opposingTeam = availableTeams[r];
+                    int opposingTeamGameCountIndex = teams.FindIndex(x => x.uniName == opposingTeam.uniName);
+
+                    bool alreadyScheduled = rotationA[schedulingTeamGameCountIndex].Any(item => item.uniName == opposingTeam.uniName);
+
+                    // if the game hasn't already been scheduled and the team isn't facing itself, add the team
+                    if (! alreadyScheduled && opposingTeam.uniName != schedulingTeam.uniName)
+                    {
+                        //add to the rotation of both teams
+                        rotationA[schedulingTeamGameCountIndex].Add(opposingTeam);
+                        rotationA[opposingTeamGameCountIndex].Add(schedulingTeam);
+
+                        //check if either team has hit the limit, which in this case is 8 (3 fixed rivalries plus 5 rotational games)
+                        if (rotationA[schedulingTeamGameCountIndex].Count == 8)
+                        {
+                            availableTeams.RemoveAt(schedulingTeamGameCountIndex);
+                        }
+                        if (rotationA[opposingTeamGameCountIndex].Count == 8)
+                        {
+                            availableTeams.RemoveAt(opposingTeamGameCountIndex);
+                        }
+                    }
+                }
+            }
+            //rotationB is taking the difference between rotationA and all teams in the conference to get the leftover teams
+            List<Team>[] rotationB = new List<Team>[teams.Count];
+
+            return;
         }
 
         public static List<Game> RoundRobinScheduling(List<Team> teams)

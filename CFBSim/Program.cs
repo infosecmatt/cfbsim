@@ -18,26 +18,26 @@ internal class Program
                 if (game.awayTeam.uniName== team.uniName || game.homeTeam.uniName == team.uniName)
                 {
                     gameCount++;
-                    if (game.awayTeam.uniName == "Georgia" || game.homeTeam.uniName == "Georgia")
+                    /*if (game.awayTeam.uniName == "Georgia" || game.homeTeam.uniName == "Georgia")
                     {
                         Console.WriteLine($"{game.awayTeam.uniName} @ {game.homeTeam.uniName}");
-                    }
+                    }*/
                 }
             }
-            //Console.WriteLine($"{team.uniName} games: {gameCount}");
+            Console.WriteLine($"{team.uniName} games: {gameCount}");
         }
 
-/*        foreach (Game game in schedule) { Console.WriteLine($"{game.awayTeam.uniName} @ {game.homeTeam.uniName}"); }
-*/
-       /* //testing football scores
-        Team mass = teams.SingleOrDefault(item => item.uniName.Equals("Massachusetts"));
-        Team uga = teams.SingleOrDefault(item => item.uniName.Equals("Georgia"));
+        /*        foreach (Game game in schedule) { Console.WriteLine($"{game.awayTeam.uniName} @ {game.homeTeam.uniName}"); }
+        */
+        /* //testing football scores
+         Team mass = teams.SingleOrDefault(item => item.uniName.Equals("Massachusetts"));
+         Team uga = teams.SingleOrDefault(item => item.uniName.Equals("Georgia"));
 
-        for (int i = 0; i < 100; i++)
-        {
-            Game game = new Game(mass, uga);
-            Console.WriteLine(game.GetFinalScore());
-        }*/
+         for (int i = 0; i < 100; i++)
+         {
+             Game game = new Game(mass, uga);
+             Console.WriteLine(game.GetFinalScore());
+         }*/
 
         /*Console.WriteLine($"There are {teams.Count} teams in college football.");
         foreach (var team in teams)
