@@ -75,98 +75,6 @@ namespace CFBSim
             return FinalSecSchedule;
         }
 
-        // this method is for generating the 3-5-5 schedule. it will produce two rotations and assign them to teams in a conference given as input
-        public static void Generate355StyleConfScheduleRotation(List<Team> teams)
-        {
-            //available teams starts off as all teams, but after a team hits 5 scheduled games it is removed from this list
-            List<Team> availableTeams = new List<Team>(teams);
-            // start off with rotationA. this is a 1d array of a list of teams. this contains all opponents of the team.
-            List<Team>[] rotationA = new List<Team>[teams.Count];
-
-            //first, add rivalries to the rotations
-            for (int i = 0; i < teams.Count; i++)
-            {
-                int mainRivalIndex = teams.FindIndex(x => x.uniName == teams[i].mainRivalUniName);
-                int secondRivalIndex = teams.FindIndex(x => x.uniName == teams[i].secondRivalUniName);
-                int thirdRivalIndex = teams.FindIndex(x => x.uniName == teams[i].thirdRivalUniName);
-
-                rotationA[i] = new List<Team>();
-                rotationA[i].Add(teams[mainRivalIndex]);
-                rotationA[i].Add(teams[secondRivalIndex]);
-                rotationA[i].Add(teams[thirdRivalIndex]);
-            }
-
-            // now, the rest
-            while (availableTeams.Count > 0)
-            {
-                //iterate over each team, one at a time. pick a random team to play against. update their availability count. update available teams (if necessary)
-                for (int availableTeamIndex = 0; availableTeamIndex < availableTeams.Count; availableTeamIndex++)
-                {
-                    Team schedulingTeam = availableTeams[availableTeamIndex];
-                    int teamIndex = teams.FindIndex(x => x.uniName == schedulingTeam.uniName);
-
-                    //subsection of teams available to this team
-                    List<Team> availableToThisTeam = availableTeams.Except(rotationA[teamIndex]).ToList();
-                    int s = availableToThisTeam.FindIndex(x => x.uniName == schedulingTeam.uniName);
-                    availableToThisTeam.RemoveAt(s);
-
-                    //get a random team from those available
-                    Random rnd = new Random();
-                    int r = rnd.Next(availableToThisTeam.Count);
-                    Team opposingTeam = availableToThisTeam[r];
-                    int opposingTeamIndex = teams.FindIndex(x => x.uniName == opposingTeam.uniName);
-
-                    //add to the rotation of both teams
-                    rotationA[teamIndex].Add(opposingTeam);
-                    rotationA[opposingTeamIndex].Add(schedulingTeam);
-
-                    //check if either team has hit the limit, which in this case is 8 (3 fixed rivalries plus 5 rotational games)
-                    if (rotationA[teamIndex].Count == 8)
-                    {
-                        availableTeams.RemoveAt(availableTeamIndex);
-                    }
-                    if (rotationA[opposingTeamIndex].Count == 8)
-                    {
-                        int opposingAvailableTeamIndex = availableTeams.FindIndex(x => x.uniName == opposingTeam.uniName);
-                        availableTeams.RemoveAt(opposingAvailableTeamIndex);
-                    }
-                }
-            }
-
-            //debugging purposes only
-            for (int i = 0; i < rotationA.Length; i++)
-            {
-                Console.WriteLine(teams[i].uniName + "season schedule: ");
-                for (int j = 0; j < rotationA[i].Count; j++)
-                {
-                    Console.WriteLine(rotationA[i][j].uniName);
-                }
-                Console.WriteLine("---");
-            }
-
-            //rotationB is taking the difference between rotationA and all teams in the conference to get the leftover teams
-            List<Team>[] rotationB = new List<Team>[teams.Count];
-            
-            // for each team, take the list of all teams except those already in rotationA. this will give you the opponents not scheduled and the host team itself. it will not include rivals. for rotationB i'll fix those issues separately.
-            for (int i = 0; i < rotationB.Length; i++)
-            {
-                //gets all teams not found in rotationA
-                rotationB[i] = teams.Except(rotationA[i]).ToList();
-                //make sure team doesn't play itself.
-                int selfTeam = rotationB[i].FindIndex(x => x.uniName == teams[i].uniName);
-                rotationB[i].RemoveAt(selfTeam);
-                //copy paste because i'm lazy
-                int mainRivalIndex = teams.FindIndex(x => x.uniName == teams[i].mainRivalUniName);
-                int secondRivalIndex = teams.FindIndex(x => x.uniName == teams[i].secondRivalUniName);
-                int thirdRivalIndex = teams.FindIndex(x => x.uniName == teams[i].thirdRivalUniName);
-                rotationB[i].Add(teams[mainRivalIndex]);
-                rotationB[i].Add(teams[secondRivalIndex]);
-                rotationB[i].Add(teams[thirdRivalIndex]);
-            }
-
-            return;
-        }
-
         public static List<Game> RoundRobinScheduling(List<Team> teams)
         {
             List<Game> schedule = new List<Game>();
@@ -179,7 +87,6 @@ namespace CFBSim
             List<Team> restTeams = new List<Team>(teams.Skip(1));
 
             int teamCount = teams.Count();
-            int gameplayWeeks;
 
             if (teamCount % 2 != 0)
             {
@@ -192,7 +99,16 @@ namespace CFBSim
                 //if there's a bye week, the team will be playing against itself. this check only adds the game to the schedule if the two objects don't match
                 if (restTeams[week % restTeams.Count]?.Equals(default) == false)
                 {
-                    schedule.Add(new Game(teams[0], restTeams[week % restTeams.Count]));
+                    //alternate home and away
+                    if (week % 2 == 0)
+                    {
+                        schedule.Add(new Game(teams[0], restTeams[week % restTeams.Count]));
+                    }
+                    else
+                    {
+                        schedule.Add(new Game(restTeams[week % restTeams.Count], teams[0]));
+                    }    
+                    
                 }
                 // rest of the teams
                 for (int index = 1; index < (teamCount / 2); index++)
@@ -210,5 +126,143 @@ namespace CFBSim
 
             return schedule;
         }
+
+        public static List<Game> Generate355Schedule(List<Team> teams)
+        {
+            List<Game> schedule = new List<Game>();
+
+            if (teams == null || teams.Count < 2)
+            {
+                return schedule;
+            }
+
+            List<Team> restTeams = new List<Team>(teams.Skip(1));
+
+            int teamCount = teams.Count();
+
+            if (teamCount % 2 != 0)
+            {
+                restTeams.Add(default);
+                teamCount++; //add a team to count to account for "bye" team
+            }
+
+            for (int week = 0; week < teamCount - 1; week++)
+            {
+                Game plannedGame = new Game(teams[0], restTeams[week % restTeams.Count]);
+                //if there's a bye week, the team will be playing against itself. this check only adds the game to the schedule if the two objects don't match
+                if (restTeams[week % restTeams.Count]?.Equals(default) == false && Valid355Game(schedule, plannedGame))
+                {
+                    //alternate home and away
+                    if (week % 2 == 0)
+                    {
+                        schedule.Add(plannedGame);
+                    }
+                    else
+                    {
+                        schedule.Add(new Game(plannedGame.awayTeam, plannedGame.homeTeam));
+                    }
+
+                }
+                // rest of the teams
+                for (int index = 1; index < (teamCount / 2); index++)
+                {
+                    Team homeTeam = restTeams[(week + index) % restTeams.Count];
+                    Team awayTeam = restTeams[(week + restTeams.Count - index) % restTeams.Count];
+
+                    plannedGame = new Game(homeTeam, awayTeam);
+                    //check for bye weeks
+                    if (homeTeam?.Equals(default) == false && awayTeam?.Equals(default) == false && Valid355Game(schedule, plannedGame))
+                    {
+                        schedule.Add(new Game(homeTeam, awayTeam));
+                    }
+                }
+
+            }
+
+            return schedule;
+        }
+
+        private static bool Valid355Game(List<Game> schedule, Game plannedGame)
+        {
+            bool ValidGame = true;
+            //see if game is already scheduled
+            Game plannedGameFlipped = new Game(plannedGame.awayTeam, plannedGame.homeTeam);
+            if (schedule.Contains(plannedGame) || schedule.Contains(plannedGameFlipped)) 
+            { 
+                ValidGame = false; 
+            }
+            //see if teams are rivals
+            else if (plannedGame.homeTeam.mainRivalUniName == plannedGame.awayTeam.uniName || plannedGame.homeTeam.secondRivalUniName == plannedGame.awayTeam.uniName || plannedGame.homeTeam.thirdRivalUniName == plannedGame.awayTeam.uniName)
+            {
+                ValidGame = false;
+            }
+
+            return ValidGame;
+        }
+
+        private static List<Game> BalanceHomeAway(List<Game> schedule, List<Team> teams)
+        {
+
+            // basic idea of what I'm going to do here is figure out what teams are unbalanced, the extent to which they're unbalanced, and then flip home/away games for unbalanced teams. so for a team with too many home games, i'll find a team with too many away games, find their game in the schedule, and flip home/away
+
+            //keep track of teams and 
+            List<Team> tooManyHomeGames = new List<Team>();
+            List<Team> tooManyAwayGames = new List<Team>();
+            List<int> HomeGameSurplus = new List<int>(); //home games count - away games count
+            List<int> AwayGameSurplus = new List<int>(); //away games count - home games count
+
+            foreach (Team team in teams)
+            {
+                int homeGameCount = schedule.Where(x => x.homeTeam.uniName.Equals(team.uniName)).Count();
+                int awayGameCount = schedule.Where(x => x.awayTeam.uniName.Equals(team.uniName)).Count();
+                if ( homeGameCount > awayGameCount )
+                {
+                    tooManyHomeGames.Add(team);
+                    HomeGameSurplus.Add(homeGameCount - awayGameCount);
+                }
+                else if (homeGameCount < awayGameCount)
+                {
+                    tooManyAwayGames.Add(team);
+                    AwayGameSurplus.Add(awayGameCount - homeGameCount);
+                }
+            }
+            for (int i = 0; i < tooManyHomeGames.Count; i++)
+            {
+                Team homeTeam = teams[0];
+                for (int j = 0; i < tooManyAwayGames.Count; i++) 
+                {
+                    Team swapTeam = tooManyAwayGames[j];
+                    int scheduleGameIndex = schedule.FindIndex(a => a.homeTeam == homeTeam && a.awayTeam == swapTeam);
+                    //only flip if it's gonna help the balance
+                    if ( scheduleGameIndex != -1 ) 
+                    { 
+                        schedule.RemoveAt( scheduleGameIndex );
+                        schedule.Add(new Game(swapTeam, homeTeam));
+                        if (HomeGameSurplus[i] == 1)
+                        {
+                            HomeGameSurplus.RemoveAt( i );
+                            tooManyHomeGames.RemoveAt( i );
+                        }
+                        else
+                        {
+                            HomeGameSurplus[i] -= 1;
+                        }
+                        if (AwayGameSurplus[j] == 1)
+                        {
+                            AwayGameSurplus.RemoveAt( j );
+                            tooManyAwayGames.RemoveAt( j );
+                        }
+                        else
+                        {
+                            AwayGameSurplus[j] -= 1;
+                        }
+
+                    }
+                }
+                
+            }
+        }
+
+        private static List<Game> GenerateRotationA(List<Game> schedule) { }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using CFBSim;
 using System.Net;
+using System.Runtime.InteropServices;
 
 internal class Program
 {
@@ -10,24 +11,51 @@ internal class Program
         List<Game> schedule = Season.MakeRegSeasonSECSchedule(teams);
         var secTeams = teams.Where(team => team.conference == "SEC").ToList();
 
-        foreach (Team team in secTeams)
-        {
-            int gameCount = 0;
-            foreach (Game game in schedule)
-            {
-                if (game.awayTeam.uniName== team.uniName || game.homeTeam.uniName == team.uniName)
+        /*        foreach (Team team in secTeams)
                 {
-                    gameCount++;
-                    /*if (game.awayTeam.uniName == "Georgia" || game.homeTeam.uniName == "Georgia")
+                    int gameCount = 0;
+                    foreach (Game game in schedule)
                     {
-                        Console.WriteLine($"{game.awayTeam.uniName} @ {game.homeTeam.uniName}");
-                    }*/
-                }
-            }
-            Console.WriteLine($"{team.uniName} games: {gameCount}");
+                        if (game.awayTeam.uniName== team.uniName || game.homeTeam.uniName == team.uniName)
+                        {
+                            gameCount++;
+                            *//*if (game.awayTeam.uniName == "Georgia" || game.homeTeam.uniName == "Georgia")
+                            {
+                                Console.WriteLine($"{game.awayTeam.uniName} @ {game.homeTeam.uniName}");
+                            }*//*
+                        }
+                    }
+                    Console.WriteLine($"{team.uniName} games: {gameCount}");*//*
 
-            List<Team> accTeams = teams.Where(team => team.conference == "ACC").ToList();
-            Season.Generate355StyleConfScheduleRotation(accTeams);
+
+                }*/
+        List<Team> accTeams = teams.Where(team => team.conference == "ACC").ToList();
+        List<Game> accSeason = Season.Generate355Schedule(accTeams);
+        List<Game> accSeasonSorted = accSeason.OrderBy(x => x.homeTeam.uniName).ToList();
+        foreach (Team team in accTeams)
+        {
+            int homeGameCount = 0;
+            int awayGameCount = 0;
+            int teamGameCount = 0;
+            foreach (Game game in accSeason)
+            {
+                if (team.uniName == game.homeTeam.uniName)
+                {
+                    Console.WriteLine($"{game.awayTeam.uniName} @ {game.homeTeam.uniName}");
+                    teamGameCount++;
+                    homeGameCount++;
+                }
+                else if (team.uniName == game.awayTeam.uniName)
+                {
+                    Console.WriteLine($"{game.awayTeam.uniName} @ {game.homeTeam.uniName}");
+                    teamGameCount++;
+                    awayGameCount++;
+                }
+
+            }
+            Console.WriteLine($"Number of games played by {team.uniName}: {teamGameCount.ToString()}");
+            Console.WriteLine($"Number of home games played by {team.uniName}: {homeGameCount.ToString()}");
+            Console.WriteLine($"Number of away games played by {team.uniName}: {awayGameCount.ToString()}");
         }
 
         /*        foreach (Game game in schedule) { Console.WriteLine($"{game.awayTeam.uniName} @ {game.homeTeam.uniName}"); }
